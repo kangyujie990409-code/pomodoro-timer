@@ -1,4 +1,4 @@
-"""桌面番茄钟 - Tkinter 单文件实现。"""
+"""桌面番茄钟 - Tkinter 单文件实现。 test v2"""
 from __future__ import annotations
 
 import json
@@ -18,7 +18,7 @@ CONFIG_PATH = Path.home() / ".pomodoro_config.json"
 DEFAULT_CONFIG = {
     "work_minutes": 25,
     "short_break_minutes": 5,
-    "long_break_minutes": 15,
+    "long_break_minutes": 13,
     "sessions_until_long_break": 4,
     "auto_start": True,
     "always_on_top": False,
@@ -40,6 +40,13 @@ PHASES = {
     "short_break": ("短休息", SHORT_BREAK_COLOR),
     "long_break": ("长休息", LONG_BREAK_COLOR),
 }
+
+
+def format_mm_ss(total_seconds: int) -> str:
+    """将剩余秒数格式化为 MM:SS；负数按 0 处理。"""
+    s = max(0, int(total_seconds))
+    m, sec = divmod(s, 60)
+    return f"{m:02d}:{sec:02d}"
 
 
 class PomodoroApp:
@@ -129,7 +136,7 @@ class PomodoroApp:
         self.canvas.pack(pady=8)
         cx = cy = self.canvas_size // 2
         self.time_text_id = self.canvas.create_text(
-            cx, cy, text="25:00",
+            cx, cy, text=format_mm_ss(self.remaining),
             font=("Segoe UI", 52, "bold"), fill=FG,
         )
 
@@ -200,8 +207,7 @@ class PomodoroApp:
         self.canvas.tag_raise(self.time_text_id)
 
     def _refresh(self) -> None:
-        mins, secs = divmod(max(self.remaining, 0), 60)
-        time_text = f"{mins:02d}:{secs:02d}"
+        time_text = format_mm_ss(self.remaining)
         self.canvas.itemconfig(self.time_text_id, text=time_text)
 
         name, color = PHASES[self.phase]
